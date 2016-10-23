@@ -6,4 +6,6 @@
 
 http://www.heweather.com/documents/cn-city-list
 
-
+#### TODOS
+- 用fragments 代替ACTIVITY 去简化逻辑，达到复用
+- 模拟网络慢的情况，显示省市区的加载进度
