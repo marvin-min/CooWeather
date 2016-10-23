@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical">
     <RelativeLayout
         android:background="#484E61"
         android:layout_width="match_parent"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
         android:layout_height="50dp">
+        <Button
+            android:background="@drawable/home"
+            android:id="@+id/selected_city"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerInParent="true"
+            android:layout_alignParentLeft="true"
 
+            />
         <TextView
             android:id="@+id/title_text"
             android:layout_width="wrap_content"
@@ -15,6 +26,14 @@
             android:layout_centerInParent="true"
             android:textColor="#fff"
             android:textSize="24sp"
+            />
+        <ImageButton
+            android:background="@drawable/refresh"
+            android:id="@+id/refresh_air"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerInParent="true"
             />
     </RelativeLayout>
     <TextView

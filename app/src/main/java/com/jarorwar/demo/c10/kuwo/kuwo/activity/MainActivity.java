@@ -50,13 +50,14 @@ public class MainActivity extends Activity {
     private City selectedCity;
     private District selectedDistrict;
     private int currentLevel;
+    private boolean isSelectedSource;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        isSelectedSource = WeatherActivity.SOURCE.equals(getIntent().getStringExtra("source"));
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if(prefs.getBoolean("city_selected",false)){
+        if(prefs.getBoolean("city_selected",false) && !isSelectedSource){
             Intent intent = new Intent(this,WeatherActivity.class);
             intent.putExtra("districtName", prefs.getString("districtName",""));
             intent.putExtra("districtCode", prefs.getString("districtCode",""));
@@ -237,6 +238,10 @@ public class MainActivity extends Activity {
         } else if (currentLevel == LEVEL_CITY) {
             queryProvinces();
         } else {
+            if(isSelectedSource){
+                Intent intent = new Intent(this,WeatherActivity.class);
+                startActivity(intent);
+            }
             finish();
         }
     }
