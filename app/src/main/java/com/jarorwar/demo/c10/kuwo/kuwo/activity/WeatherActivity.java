@@ -3,6 +3,7 @@ package com.jarorwar.demo.c10.kuwo.kuwo.activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.FeatureInfo;
 import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jarorwar.demo.c10.kuwo.kuwo.R;
+import com.jarorwar.demo.c10.kuwo.kuwo.service.AutoUpdateService;
 import com.jarorwar.demo.c10.kuwo.kuwo.util.HttpCallBackListener;
 import com.jarorwar.demo.c10.kuwo.kuwo.util.HttpUtil;
 import com.jarorwar.demo.c10.kuwo.kuwo.util.Utility;
@@ -83,6 +85,9 @@ public class WeatherActivity extends Activity {
         tmp.setText(prefs.getString("tmp",""));
         condText.setText(prefs.getString("cond",""));
         updatedAt.setText(prefs.getString("updatedAt",""));
+
+        Intent intet = new Intent(this, AutoUpdateService.class);
+        startService(intet);
 
     }
 
