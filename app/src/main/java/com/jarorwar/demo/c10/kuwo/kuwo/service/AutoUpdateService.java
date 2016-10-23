@@ -27,31 +27,35 @@ public class AutoUpdateService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                updateWeather();
-                System.out.println("=======onStartCommand=======");
-            }
-        }).start();
-        AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        int anHour = 1 * 60 * 60 * 1000;
-        long triggerAtTime = SystemClock.elapsedRealtime() + anHour;
-        Intent i = new Intent(this,AutoUpdateReceiver.class);
-        PendingIntent pendIntent = PendingIntent.getBroadcast(this,0,i,0);
-        manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,triggerAtTime,pendIntent);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (!prefs.getBoolean("enableAutoUpdate", false)) {
+            stopSelf(startId);
+        } else {
+            final String districtCode = prefs.getString("districtCode", "");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    updateWeather(districtCode);
+                    System.out.println("=======onStartCommand=======");
+                }
+            }).start();
+            AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            int anHour = 60 * 60 * 1000;
+            long triggerAtTime = SystemClock.elapsedRealtime() + anHour;
+            Intent i = new Intent(this, AutoUpdateReceiver.class);
+            PendingIntent pendIntent = PendingIntent.getBroadcast(this, 0, i, 0);
+            manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtTime, pendIntent);
+        }
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void updateWeather() {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String districtCode = prefs.getString("districtCode","");
+    private void updateWeather(String districtCode) {
         System.out.println("=======updateWeather=======");
         String url = WeatherActivity.URL + districtCode;
         HttpUtil.sendHttpRequest(url, new HttpCallBackListener() {
             @Override
             public void onFinish(String response) {
-                Utility.handleWeatherResponse(AutoUpdateService.this,response);
+                Utility.handleWeatherResponse(AutoUpdateService.this, response);
             }
 
             @Override

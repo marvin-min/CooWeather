@@ -6,14 +6,17 @@ import android.content.SharedPreferences;
 import android.content.pm.FeatureInfo;
 import android.icu.text.SimpleDateFormat;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.jarorwar.demo.c10.kuwo.kuwo.R;
 import com.jarorwar.demo.c10.kuwo.kuwo.service.AutoUpdateService;
@@ -34,6 +37,8 @@ public class WeatherActivity extends Activity {
     private TextView today;
     private Button selectCity;
     private ImageButton refreshWeather;
+    private ToggleButton autoUpdateEnable;
+    private boolean enableAutoUpdate = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,12 +53,23 @@ public class WeatherActivity extends Activity {
 
         refreshWeather = (ImageButton) findViewById(R.id.refresh_air);
         selectCity = (Button) findViewById(R.id.selected_city);
+        autoUpdateEnable = (ToggleButton) findViewById(R.id.auto_update_cotroll_button);
+        autoUpdateEnable.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                enableAutoUpdate = isChecked;
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+                editor.putBoolean("enableAutoUpdate", isChecked);
+                editor.commit();
+                startAutoUpdate();
+            }
+        });
 
         selectCity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(WeatherActivity.this,MainActivity.class);
-                intent.putExtra("source",SOURCE);
+                Intent intent = new Intent(WeatherActivity.this, MainActivity.class);
+                intent.putExtra("source", SOURCE);
                 startActivity(intent);
                 finish();
             }
@@ -71,32 +87,39 @@ public class WeatherActivity extends Activity {
 
     private void refreshWeather() {
         String districtCode = getIntent().getStringExtra("districtCode");
-        if(!TextUtils.isEmpty(districtCode)){
+        if (!TextUtils.isEmpty(districtCode)) {
             querytWeather(districtCode);
-        }else {
+        } else {
             showWeather();
         }
     }
 
     private void showWeather() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        title_text.setText(prefs.getString("districtName",""));
-        today.setText(prefs.getString("current",""));
-        tmp.setText(prefs.getString("tmp",""));
-        condText.setText(prefs.getString("cond",""));
-        updatedAt.setText(prefs.getString("updatedAt",""));
+        title_text.setText(prefs.getString("districtName", ""));
+        today.setText(prefs.getString("current", ""));
+        tmp.setText(prefs.getString("tmp", ""));
+        condText.setText(prefs.getString("cond", ""));
+        updatedAt.setText(prefs.getString("updatedAt", ""));
+        enableAutoUpdate = prefs.getBoolean("enableAutoUpdate", false);
 
-        Intent intet = new Intent(this, AutoUpdateService.class);
-        startService(intet);
+        startAutoUpdate();
 
     }
 
-    private void querytWeather(String districtCode){
+    private void startAutoUpdate() {
+        Intent intet = new Intent(WeatherActivity.this, AutoUpdateService.class);
+        if (enableAutoUpdate) {
+            startService(intet);
+        }
+    }
+
+    private void querytWeather(String districtCode) {
         updatedAt.setText("同步中...");
-        HttpUtil.sendHttpRequest(URL+districtCode, new HttpCallBackListener() {
+        HttpUtil.sendHttpRequest(URL + districtCode, new HttpCallBackListener() {
             @Override
             public void onFinish(String response) {
-                Utility.handleWeatherResponse(WeatherActivity.this,response);
+                Utility.handleWeatherResponse(WeatherActivity.this, response);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -107,7 +130,7 @@ public class WeatherActivity extends Activity {
 
             @Override
             public void onError(Exception e) {
-                Toast.makeText(WeatherActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(WeatherActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
